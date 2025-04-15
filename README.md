@@ -4,7 +4,7 @@ Enter stock symbol then the code will try to predict it fetches the data from ya
 TSLA <BR>
 Today 252.25 <BR>
 Tomorrow 247.00 <BR>
-
+Need to execute before pre market open 7 AM This is for my own use for testing. Please do not follow using it as reference only
 ![image](https://github.com/user-attachments/assets/61256d45-d1dd-4e03-b944-46150587ad42)
 
 Result is very close
