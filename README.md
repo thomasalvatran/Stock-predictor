@@ -7,3 +7,7 @@ Tomorrow 247.00 <BR>
 
 ![image](https://github.com/user-attachments/assets/61256d45-d1dd-4e03-b944-46150587ad42)
 
+Result is very close
+![image](https://github.com/user-attachments/assets/3c666bcf-1a20-42bb-8b8c-bcc662c76a7d)
+
+
