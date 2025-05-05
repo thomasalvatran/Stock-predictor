@@ -1,0 +1,79 @@
+# 0. Import libraries
+import requests
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense
+
+# 1. Config
+API_KEY = '51F4ZU2HRHY6HZET'  # 🔑 Replace with your real API key
+symbol = input("📥 Enter stock symbol (e.g. AAPL, TSLA): ").upper()
+url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=compact&apikey={API_KEY}'
+
+# 2. Fetch data with error handling
+print(f"📡 Fetching data for {symbol}...")
+try:
+    response = requests.get(url, timeout=10)
+    data = response.json()
+except Exception as e:
+    print(f"❌ Connection failed: {e}")
+    exit()
+
+# 3. Check for valid response
+if "Time Series (Daily)" not in data:
+    print("❌ API error or rate limit reached.")
+    print("🔎 Response:", data)
+    exit()
+
+# 4. Parse data
+df = pd.DataFrame(data['Time Series (Daily)']).T
+df = df.astype(float)
+df = df[['4. close']]
+df.columns = ['Close']
+df = df.sort_index()
+
+# 5. Preprocess
+scaler = MinMaxScaler()
+scaled_data = scaler.fit_transform(df[['Close']])
+
+X = []
+y = []
+window_size = 10
+
+for i in range(window_size, len(scaled_data)):
+    X.append(scaled_data[i - window_size:i, 0])
+    y.append(scaled_data[i, 0])
+
+X = np.array(X)
+y = np.array(y)
+X = X.reshape((X.shape[0], X.shape[1], 1))
+
+# 6. Build model
+model = Sequential()
+model.add(LSTM(50, return_sequences=True, input_shape=(X.shape[1], 1)))
+model.add(LSTM(50))
+model.add(Dense(1))
+model.compile(optimizer='adam', loss='mean_squared_error')
+model.fit(X, y, epochs=30, batch_size=8, verbose=0)
+
+# 7. Predict tomorrow
+last_10 = scaled_data[-window_size:]
+last_10 = last_10.reshape((1, window_size, 1))
+predicted_scaled = model.predict(last_10)
+predicted_price = scaler.inverse_transform(predicted_scaled)[0][0]
+
+# 8. Results
+today_price = df['Close'].iloc[-1]
+print(f"\n✅ Symbol: {symbol}")
+print(f"✅ Today's price: ${today_price:.2f}")
+print(f"🔮 Predicted tomorrow: ${predicted_price:.2f}")
+
+# 9. Plot
+plt.plot(df['Close'], label="Actual Prices")
+plt.axhline(predicted_price, color='red', linestyle='--', label="Predicted Tomorrow")
+plt.title(f"Price Prediction for {symbol}")
+plt.legend()
+plt.grid(True)
+plt.show()
