@@ -81,4 +81,4 @@ Result is here
 
 ![image](https://github.com/user-attachments/assets/905409a0-76b5-4505-9d91-03a0ac015a96)
 
-
+Instead of using yahoo finance use ALPHA key
