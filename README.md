@@ -79,3 +79,13 @@ Result is here
 
 
 
+ Google Codelab vs Google Colab
+Feature	Google Codelab	Google Colab
+🔍 What is it?	Interactive tutorial website	Cloud-based Jupyter notebook (for running Python)
+📚 Purpose	Teach you how to build apps, ML models, etc.	Run and experiment with Python code
+🛠️ Can run code?	❌ No — it's just a step-by-step guide	✅ Yes — executes Python code in the cloud
+🔗 Common Use	Links to GitHub, Colab, or downloads	Linked from Codelabs for live coding
+📝 Content Format	Markdown-based tutorial	Python + Markdown cells (like Jupyter)
+🌐 Where to use?	codelabs.developers.google.com	colab.research.google.com
+👤 Account Needed?	No (but optional for saving progress)	Yes (Google account needed)
+
