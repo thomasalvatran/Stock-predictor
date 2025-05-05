@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+#  simulated data hoặc synthetic data not from yahoo financing it is emulate/simmulate data
 # 1. Tạo dữ liệu giá cổ phiếu giả lập
 np.random.seed(42)
 prices = np.cumsum(np.random.randn(90) * 2 + 0.5) + 150  # Giả lập giá cổ phiếu trong 90 ngày
