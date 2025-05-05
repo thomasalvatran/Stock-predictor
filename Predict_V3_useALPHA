@@ -8,7 +8,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
 
 # 1. Config
-API_KEY = '51F4ZU2HRHY6XXXX'  # 🔑 Replace with your real API key
+API_KEY = '51F4ZU2HRHY6XXXX'  # 🔑 Replace with your real API key register https://www.alphavantage.co/support/ to get API key
 symbol = input("📥 Enter stock symbol (e.g. AAPL, TSLA): ").upper()
 url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=compact&apikey={API_KEY}'
 
