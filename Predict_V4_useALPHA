@@ -1,0 +1,85 @@
+# 0. Import thư viện
+import requests
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense
+
+# 1. Nhập mã cổ phiếu và cấu hình API
+API_KEY = '51F4ZU2HRHY6XXXX'  # 🔑 Thay bằng API key thật của bạn nếu cần using https://www.alphavantage.co/support/#api-key this version has value for dash red line
+symbol = input("📥 Nhập mã cổ phiếu (ví dụ TSLA, AAPL, MSFT): ").upper()
+url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=compact&apikey={API_KEY}'
+
+# 2. Tải dữ liệu từ API
+print(f"📡 Đang tải dữ liệu cho {symbol}...")
+try:
+    response = requests.get(url, timeout=10)
+    data = response.json()
+except Exception as e:
+    print(f"❌ Kết nối thất bại: {e}")
+    exit()
+
+# 3. Kiểm tra phản hồi API
+if "Time Series (Daily)" not in data:
+    print("❌ Lỗi API hoặc đã vượt giới hạn truy cập.")
+    print("🔎 Phản hồi từ server:", data)
+    exit()
+
+# 4. Chuyển dữ liệu thành DataFrame
+df = pd.DataFrame(data['Time Series (Daily)']).T
+df = df.astype(float)
+df = df[['4. close']]
+df.columns = ['Close']
+df = df.sort_index()  # Sắp xếp theo thời gian tăng dần
+
+# 5. Tiền xử lý dữ liệu
+scaler = MinMaxScaler()
+scaled_data = scaler.fit_transform(df[['Close']])
+
+X = []
+y = []
+window_size = 10  # Số ngày dùng để dự đoán
+
+for i in range(window_size, len(scaled_data)):
+    X.append(scaled_data[i - window_size:i, 0])
+    y.append(scaled_data[i, 0])
+
+X = np.array(X)
+y = np.array(y)
+X = X.reshape((X.shape[0], X.shape[1], 1))  # Reshape cho LSTM
+
+# 6. Xây dựng mô hình LSTM
+model = Sequential()
+model.add(LSTM(50, return_sequences=True, input_shape=(X.shape[1], 1)))
+model.add(LSTM(50))
+model.add(Dense(1))
+model.compile(optimizer='adam', loss='mean_squared_error')
+model.fit(X, y, epochs=30, batch_size=8, verbose=0)
+
+# 7. Dự đoán giá ngày mai
+last_10 = scaled_data[-window_size:]
+last_10 = last_10.reshape((1, window_size, 1))
+predicted_scaled = model.predict(last_10)
+predicted_price = scaler.inverse_transform(predicted_scaled)[0][0]
+
+# 8. In kết quả
+today_price = df['Close'].iloc[-1]
+print(f"\n✅ Mã: {symbol}")
+print(f"✅ Giá hôm nay: ${today_price:.2f}")
+print(f"🔮 Dự đoán ngày mai: ${predicted_price:.2f}")
+
+# 9. Vẽ biểu đồ
+plt.figure(figsize=(12, 6))
+plt.plot(df['Close'].values, label="Giá thực tế")
+plt.axhline(predicted_price, color='red', linestyle='--', label="Giá dự đoán ngày mai")
+plt.text(len(df) - 1, predicted_price, f"${predicted_price:.2f}", color='red', va='bottom', ha='right', fontsize=10)
+
+plt.title(f"Dự đoán giá cổ phiếu {symbol}")
+plt.xlabel("Thời gian")
+plt.ylabel("Giá USD")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
